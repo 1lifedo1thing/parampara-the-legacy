@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+
+# Secrets - never commit real keys
+.env
+.env.*
+!.env.example
+
+# Original archive of the docs pack (kept locally, not versioned)
+*.zip
+
+# Dependencies and builds
+node_modules/
+.turbo/
+.next/
+.expo/
+dist/
+build/
+
+# Local agent and editor state
+.lavish/
+.vscode/
+CLAUDE.local.md
