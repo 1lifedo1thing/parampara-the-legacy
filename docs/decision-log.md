@@ -115,3 +115,97 @@ Record durable product and architecture decisions here. Add date, status, contex
 - Decision: Add `docs/model-catalog.md` with model IDs, prices, and four data-handling classes (A paid, B free zero-retention, C free with possible training, D trial-only). Free models may see public repository content only, never secrets or family data, and never do T2, T3, review, or security work. Laya also classifies task sensitivity and volume, and routes bulk low-risk work to class B or cheap paid models first.
 - Consequence: Free lineups rotate, so the catalog carries a verification date and must be re-checked monthly. Hermes is not in Firstmate's documented harness list; use it through a herdr pane until verified. Do not add `AGENTS.override.md` or `.hermes.md`, which would shadow `AGENTS.md`.
 - Follow-up: Run each harness once in this repo and record results (Feature 0). Done 2026-10-11 except agy (quota); results in `docs/model-routing.md`, open items in `docs/harness-setup.md`.
+
+## D-023: Close-relative eligibility per claim type (2026-10-11)
+- Status: Accepted
+- Context: Reviewer eligibility for claims, deceased profiles, and historical facts was open (PRD open decision 1; scope foundation item "Define close-relative eligibility"). D-016 needs "eligible close relatives" defined before Feature 5 and Feature 6 can be built.
+- Options considered: (A) two circles of relatives, scoped by claim type, with a block right for living parties to an edge; (B) one combined circle for every claim type, no block right; (C) a wider circle up to the third degree (adds cousins, grand-uncles and grand-aunts); (D) reviewers designated by the family administrator.
+- Decision: Option A. Relatives are counted from the subject's point of view:
+  - Core relatives: spouse or partner, parents, children, and siblings (including half-siblings).
+  - Extended relatives: grandparents, grandchildren, parents' siblings, siblings' children, and children's spouses.
+  - New relationship at invitation: only the other party to the invitation confirms (1).
+  - Low-risk profile-field correction: the subject alone when living and registered; otherwise 1 approval from a core or extended relative.
+  - Change to an established parent-child or marriage/partner edge: 2 approvals in total. Every living, registered party to the edge must be among the approvers, and a rejection by such a party blocks the change. The other approvals come from core relatives of either party.
+  - Uncertain historical claim: 2 approvals from core or extended relatives, plus evidence under D-005.
+  - Deceased profile (D-016): core and extended relatives are both eligible and both count toward the three (or two plus reviewed evidence); review requests go to core relatives first.
+- Constraints for every claim type: a reviewer has a verified account, is an adult (not guardian-managed), and is a registered member of the family group; their path to the subject uses only accepted edges and never the edge under review; the proposer never counts, even when they are a party to the edge or a core relative (a proposing party's proposal stands as their consent, and the living-party requirement then applies to the other parties); one person counts once however many paths connect them.
+- Rationale: Parentage and marriage changes are the highest-risk edits, so the people on the edge and their immediate family decide them, and a living person cannot have their own parentage or marriage changed over their objection. Older deceased ancestors often have few living core relatives, so extended relatives (grandchildren, daughters-in-law, sons-in-law) are needed or D-016 profiles would stay pending indefinitely.
+- Consequences: Eligibility is a pure function in `packages/domain`, computed server-side at decision time. Acceptance criteria in `docs/acceptance-criteria.md` (shared definitions, Feature 5, Feature 6).
+- Reversible recommendations recorded with this decision (not owner-decided; revisit if they cause problems): a living party to an edge who has not yet registered cannot approve, is notified through the contact on file, and can open a dispute after registering; a rejection by an eligible reviewer who is not a party moves the claim to `disputed` for evidence or administrator escalation rather than rejecting it outright.
+
+## D-024: Which stories need approval, and by whom (2026-10-11)
+- Status: Accepted
+- Context: FR-07 says memories need no approval and a story about a person needs approval from that person's living close relatives, but left the scope, reviewer set, and threshold to Feature 7 (PRD open decision; scope Feature 7). The original brief's example: a father's memory of the deceased grandfather is accepted, while a story about the grandfather is verified by the grandmother, uncles, or aunts.
+- Options considered: (A) only stories with tagged subjects, one approval per subject; (B) as A, but a deceased or not-registered subject needs 2 core-relative approvals; (C) every story needs approval from a core relative of the contributor, plus subject rules; (D) the family administrator approves all stories.
+- Decision: Option B.
+  - Memories (the contributor's own experience) never need approval, even when other people appear in them.
+  - A story needs approval when it names one or more people (its subjects) or makes historical claims about a family event the contributor did not experience. The contributor tags the subjects.
+  - Living, registered adult subject: the subject alone approves (1).
+  - Deceased or not-registered subject: 2 approvals from registered core relatives of the subject (D-023); when fewer than 2 core relatives are eligible, extended relatives fill the remaining approvals.
+  - Minor subject: the minor's guardian approves.
+  - A story with several subjects is published only when every subject's rule is met.
+  - The contributor never approves their own story, and one person counts once per subject.
+  - An eligible reviewer for a person who appears in an untagged memory or story can flag it as making claims about that person, which sends it to review under these rules.
+  - A rejection by any eligible reviewer starts the story dispute workflow (60-day rule, D-006).
+- Rationale: A living person has the final say over stories about themselves; people who can no longer speak for themselves get a two-relative check on their reputation. Extended relatives fill in only where the core circle is too small, so stories about older ancestors are not blocked forever.
+- Consequences: Story review reuses the D-023 eligibility function. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7).
+- Reversible recommendation recorded with this decision (not owner-decided): a story about a deceased or unregistered adult subject with fewer than 2 eligible relatives in total stays `in_review`, and the contributor may withdraw it to drafts at any time.
+
+## D-025: First-launch languages and kinship terminology (2026-10-11)
+- Status: Accepted
+- Context: Initial languages and regional terminology were open (PRD open decision 3; scope foundation item "Define first-launch languages/regions"). Telugu comes first. The domain model warns that one Telugu vocabulary is not universal across regions or households.
+- Options considered: (A) English interface with Telugu kinship terms; (B) A plus a full Telugu translation of the interface with a language switch; (C) A plus separate Coastal Andhra, Telangana, and Rayalaseema catalogues at launch; (D) Telugu plus one or two more languages' kinship catalogues at launch.
+- Decision: Option B.
+  - Interface: English and Telugu at launch on web, iOS, and Android, with a language switch available to every member. Every user-facing string, including notifications, emails or SMS, and error messages, exists in both languages.
+  - Kinship terms: one general Telugu catalogue (`te-IN`), shown in Telugu script with a Latin transliteration; each viewer chooses script, transliteration, or both.
+  - Fallback: where Telugu has no validated term for a path, a plain description is shown in the viewer's interface language.
+  - Regional and household variants (Coastal Andhra, Telangana, Rayalaseema, family-specific): captured as family custom labels at launch and promoted into regional catalogues once validated by native speakers.
+  - Person names accept any Unicode script from day one.
+  - Other languages (for example Hindi, Tamil, Kannada) come after the pilot.
+- Rationale: Older relatives, who hold most of the family history, often read Telugu more comfortably than English. Custom labels cover regional differences without shipping unvalidated regional catalogues.
+- Consequences: Every UI change needs a reviewed Telugu translation before release, on all three platforms; Feature 1 must pick an i18n approach shared by Next.js and Expo, and CI should fail on a missing translation key. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 4).
+- Reversible recommendations recorded with this decision (not owner-decided): the interface language defaults to the device or browser language when it is Telugu, otherwise English; Telugu interface strings are reviewed by a native speaker, and machine translation may draft them but never ships unreviewed.
+
+## D-026: Story dispute timer rules (2026-10-11)
+- Status: Accepted; fills in the open details of D-006
+- Context: D-006 set a 60-day resolution window for story disputes, after which an unresolved story moves to the contributor's private drafts, but left the timer start, visibility, resolution, extension, notifications, and exceptions open (scope Feature 7).
+- Options considered: (A) timer starts at the first dispute and the story stays visible to its audience marked "disputed"; (B) as A, but the story is hidden from the wider family while the dispute is open; (C) as A with no extension; (D) as A, but the clock starts when the contributor opens the dispute notice or 7 days after it is sent.
+- Decision: Option B.
+  - Start: the timer starts when an eligible reviewer opens a dispute on a story, whether it is in review or published. There is one timer per story; further disputes on the same story join it and do not reset it.
+  - Visibility during the dispute: the story and its alternative versions are hidden from its normal audience. Only these people can see them: the contributor; every member who disputed it; the story's eligible reviewers under D-024; its living, registered subjects (and a minor subject's guardian); and a family administrator only once the dispute has been escalated to them and only if they are not a party. Other administrators have no access, in line with FR-11.
+  - Resolution, any one of: every disputing member withdraws; the contributor edits the story, every disputing member accepts the edited version, and the D-024 approval rule is met for it; or a family administrator who is not the contributor, a disputer, or a subject resolves the escalated dispute and records the basis. A story resolved in favour of publication returns to its audience.
+  - Extension: once per dispute, by up to 30 days, by a family administrator who is not a party, with a recorded reason, before the deadline.
+  - Notifications: the contributor, the disputers, and the eligible reviewers are notified when the dispute opens, at day 30, 7 days before the deadline, and at expiry.
+  - Expiry: if unresolved at the deadline, the story moves to the contributor's private drafts, keeping its versions and dispute record.
+  - Exceptions: a legal hold freezes the story in its hidden state until the hold is lifted; if the contributor has closed their account or died, the story moves to `archived_restricted` under the preservation policy (D-008) instead of to drafts.
+- Rationale: A story that a close relative says is false or hurtful should not stay in front of the family while it is being discussed. Keeping the visible circle to the people who need it to resolve the dispute respects FR-11 (administrator status is not blanket access).
+- Consequences: Any one eligible reviewer can take a published story out of view for up to 60 days (90 with an extension) by disputing it; this is the accepted trade-off. Media attached to a hidden story follows the story's visibility. The deadline job runs as a Convex scheduled function. Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7).
+- Reversible recommendation recorded with this decision (not owner-decided): a member may open at most one dispute per story at a time, and a dispute withdrawn by every disputer ends the timer; a new dispute after resolution starts a new 60-day timer.
+
+## D-027: Connecting a new deceased profile to the family (2026-10-11)
+- Status: Accepted; extends D-016 and D-023
+- Context: Review of PR #4 (Greptile) found that D-023 covers new relationships made at invitation and changes to established relationships, but not the new relationships that connect a newly proposed deceased person to the family. A deceased person cannot confirm an invitation, and reviewers must be eligible through accepted relationships that never include the edge under review, so a new, unconnected deceased profile had no approval path.
+- Options considered: (A) the deceased-profile claim carries its proposed connecting edges, each living registered person on an edge confirms their own edge, and the profile is approved and its edges accepted together; (B) the edges are approved first as separate relationship claims, then the profile; (C) the proposer's edge is accepted provisionally and other relatives review through it.
+- Decision: Option A.
+  - A deceased-profile claim includes the relationship edges that connect the deceased person to existing people (for example Venkata as spouse of Sarada and parent of Ravi, Anil, and Padma).
+  - Each living, registered person named on a proposed edge confirms or rejects their own edge, as the other party does at invitation. When the proposer is on an edge, their proposal stands as their consent to that edge, but the proposer never counts as an approver of the profile.
+  - A reviewer is eligible for the profile only through an edge they have confirmed themselves or through edges that are already accepted; a path through another person's unconfirmed proposed edge does not count.
+  - The D-016 threshold is unchanged. When it is met, the profile becomes `approved` and every confirmed connecting edge becomes `accepted`, together in one Convex mutation.
+- Rationale: The people who know the deceased person best are the ones the proposer names as spouse, children, or siblings; asking each of them to vouch for their own link keeps the D-016 threshold meaningful without a separate round of relationship claims.
+- Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 6, "Connecting a new deceased profile").
+- Reversible recommendations recorded with this decision (not owner-decided): a proposed edge rejected by the person on it is not created and that person gains no eligibility through it, while the rest of the claim continues; a proposed edge to a living person who is not registered stays `pending` after the profile is approved, until that person registers and confirms it, and does not block the profile.
+
+## D-028: Event stories must tag a subject (2026-10-11)
+- Status: Accepted; amends D-024
+- Context: Review of PR #4 (Greptile) found that D-024 makes a story about a family event the contributor did not experience need approval, but every approval rule depends on a subject, so an event story naming no person (for example the ancestral home being destroyed in a flood) had no reviewer set.
+- Options considered: (A) an event story must tag at least one subject, then the D-024 subject rules apply; (B) an event story with no subject needs 2 approvals from registered adult core relatives of the contributor; (C) an event story with no subject is treated as a memory and needs no approval.
+- Decision: Option A. A story about a family event must tag at least one subject: the person or people the event concerns (for example the head of the household at the time). The D-024 rules for each tagged subject then apply. A story with no tagged subject cannot be submitted.
+- Rationale: Every claim about the family's past concerns someone; tagging them gives the story a reviewer set from the existing rules instead of a new approval path.
+- Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7, "Event stories").
+- Reversible recommendation recorded with this decision (not owner-decided): changing the tagged subjects of a story that is in review or published restarts review under the new subject set, and removing the last subject is rejected.
+
+## D-029: One approval counts toward only one subject (2026-10-11)
+- Status: Accepted; clarifies D-024
+- Context: Review of PR #4 found that D-024's "one person counts once per subject" could be read as letting one approver satisfy several subjects' rules, which changes the threshold for a story tagging a living subject and a deceased subject.
+- Decision: No double counting across subjects. One person's approval counts toward only one subject's rule. For a story tagging a living subject and a deceased subject, the deceased subject's 2 core-relative approvals come from people other than the approver who approves as the living subject. A story tagging Venkata and Sarada needs 3 approvals in total: Sarada as subject plus 2 other core relatives of Venkata (for example Anil and Padma).
+- Consequences: Acceptance criteria in `docs/acceptance-criteria.md` (Feature 7, "Story approval", AC-7.18, AC-7.25, AC-7.26).

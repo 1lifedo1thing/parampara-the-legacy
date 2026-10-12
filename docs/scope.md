@@ -26,7 +26,7 @@ During implementation, maintain a short checklist below the feature. After imple
 
 ## Current status (2026-10-10)
 
-- Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021).
+- Documentation and agent setup refined: shared `AGENTS.md`, thin `CLAUDE.md`, skills audited, model routing documented, stack and several product rules decided (D-012 to D-021); approval, story, language, and dispute-timer rules decided (D-023 to D-029) with testable criteria in `docs/acceptance-criteria.md`.
 - No application code yet. Next approved step candidates: Feature 0 (agent tooling) and Feature 1 (monorepo scaffold).
 - Time-sensitive: Laya is free on Vercel AI Gateway only through 2026-10-31.
 
@@ -57,9 +57,9 @@ P0/P1 express sequencing priority, not exclusion from the agreed MVP.
 - [x] Decide backend, authentication, and media storage (D-014, D-015). Hosting regions and migrations approach: open.
 - [ ] Confirm supported relationship types and constraints.
 - [x] Deceased-profile threshold when three eligible relatives are unavailable (D-016).
-- [ ] Define close-relative eligibility (who counts as close for each claim type).
-- [ ] Define review thresholds for new claims versus changes to established parent-child or marriage relationships.
-- [ ] Define first-launch languages/regions for kinship terminology.
+- [x] Define close-relative eligibility (who counts as close for each claim type) (D-023).
+- [x] Define review thresholds for new claims versus changes to established parent-child or marriage relationships (D-023).
+- [x] Define first-launch languages/regions for kinship terminology (D-025).
 - [ ] Define profile and archival retention policy, including deletion requests and backups.
 
 ## Feature 0: agent tooling
@@ -129,7 +129,7 @@ Each individual has one canonical person record. Relationships are separate reco
 Calculate valid labels from the relationship graph. Use paternal-side preference as the default when multiple valid labels apply, unless a more specific user preference is set. Offer other valid labels. Support language, region, and family custom.
 
 ### Checklist
-- [ ] Define terminology catalogue and locale fallback.
+- [x] Define terminology catalogue and locale fallback (D-025: English and Telugu interface, general `te-IN` term catalogue, descriptive fallback; criteria in `docs/acceptance-criteria.md`).
 - [ ] Keep labels separate from canonical relationship edges.
 - [ ] Validate initial terminology with native speakers/families.
 - [ ] Test alternate paths, missing terms, custom labels, and user preferences.
@@ -140,8 +140,8 @@ Calculate valid labels from the relationship graph. Use paternal-side preference
 Verified members can propose changes. Established parent-child and marriage relationships receive stricter review by close relatives. Reviewers must not approve their own proposal. All sensitive changes preserve old values, evidence, decisions, and timestamps.
 
 ### Checklist
-- [ ] Define eligibility for close and independent reviewers.
-- [ ] Define approval thresholds by change type.
+- [x] Define eligibility for close and independent reviewers (D-023; criteria in `docs/acceptance-criteria.md`).
+- [x] Define approval thresholds by change type (D-023).
 - [ ] Define reject, request-evidence, dispute, and escalation paths.
 - [ ] Test unauthorized approval and concurrent conflicting proposals.
 
@@ -152,7 +152,7 @@ Initial approval requires three eligible close relatives. With fewer than three 
 
 ### Checklist
 - [ ] Define field-level confidence/status.
-- [ ] Define reviewer eligibility and conflict-of-interest rules.
+- [x] Define reviewer eligibility and conflict-of-interest rules (D-023: core and extended relatives; proposer never counts).
 - [ ] Restrict evidence to authorized reviewers.
 - [ ] Test insufficient evidence, contradictory evidence, and unavailable reviewers.
 
@@ -162,8 +162,8 @@ Initial approval requires three eligible close relatives. With fewer than three 
 Personal memories represent the contributor's own experience. Historical stories make claims about people or events and can require review. Disputed versions may coexist during review. An unresolved story dispute moves to the contributor's private drafts after 60 days, subject to documented exceptions. Photos and audio inherit content permissions.
 
 ### Checklist
-- [ ] Define content types, authorship, access, and publication state.
-- [ ] Define when the 60-day timer starts and who can resolve/extend it.
+- [x] Define content types, authorship, access, and publication state (D-024 for story approval; criteria in `docs/acceptance-criteria.md`).
+- [x] Define when the 60-day timer starts and who can resolve/extend it (D-026; criteria in `docs/acceptance-criteria.md`).
 - [ ] Implement private media storage and revocable access.
 - [ ] Test disputed-story expiry, contributor departure, and revoked media access.
 
