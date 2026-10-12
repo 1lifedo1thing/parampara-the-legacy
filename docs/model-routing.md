@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted direction (2026-10-10, D-019; extended 2026-10-11, D-022). The static routing table below is usable today by any human or lead agent. The Laya classifier script is **not yet implemented**; it is tracked as Feature 0 in `docs/scope.md`.
+Accepted direction (2026-10-10, D-019; extended 2026-10-11, D-022). The static routing table below is usable today by any human or lead agent. The Laya classifier script is implemented in `tools/route-task` (usage in its README); the live Laya call has not yet been verified by the owner (see `docs/scope.md`).
 
 Model names, availability, pricing, and free quotas change often. The concrete model list, prices, and data-handling classes live in `docs/model-catalog.md`; verify them before relying on this table.
 
@@ -59,9 +59,9 @@ The same instruction filenames can shadow `AGENTS.md`: never add `AGENTS.overrid
 - Self-hosting: weights are Apache 2.0 on Hugging Face (use the official Convai repository, not mirrors).
 - Credentials: `AI_GATEWAY_API_KEY` in a gitignored `.env.local`. Never commit it, never paste it into prompts or docs. `.env.example` lists the variable name only.
 
-### Planned classifier contract (Feature 0)
+### Classifier contract
 
-Input: the task description only (no code, no family data), plus the available-model list derived from `docs/model-catalog.md` (tier and class columns only).
+Input to Laya: the task description only (no code, no family data). The router applies the tier and class columns of `docs/model-catalog.md` locally after Laya answers, so no catalog content is sent to Laya.
 
 Questions asked of Laya:
 - `tier`: choice of `T0 | T1 | T2 | T3 | R | D` (`R` = review of any kind: PR review, adversarial review, security or domain review, regardless of how small or public the content is).
@@ -73,7 +73,7 @@ Questions asked of Laya:
 Decision rule:
 1. If `touches_high_risk_area` is true, minimum tier is T2 and free models are excluded. Tiers T2, T3 and R never use free models, whatever the other answers are; check this before any volume-based preference.
 2. If `involves_sensitive_context` is true, only class A models are allowed. If the task contains real secrets or family data, stop: the task must be rewritten, not routed.
-3. If the top choice probability is below 0.7, take the higher of the two most likely tiers.
+3. If the top choice probability is below 0.7, take the higher of the two most likely tiers; when R is one of the two, choose R, and otherwise break ties toward the higher-risk tier (T1 over D, T2 over T1, T3 over T2).
 4. Only for tiers T0, T1 and D (never R, T2 or T3), with `volume = bulk` and no sensitive context, prefer a class B free model, then a cheap paid model, then the default. A task that is itself a review is tier `R`, so this rule does not apply to it. (`needs_independent_review` only says the output must later be reviewed; it does not change the model for the task itself.)
 5. Map the result to a model in the catalog, then to a harness (OpenCode, Pi, Hermes, Claude Code, Codex, Antigravity) or a Firstmate dispatch profile.
 6. If Laya is unavailable, errors, or the budget cap is hit, fall back to the static table with a human or lead-agent decision. Core work must never depend on Laya being up.
