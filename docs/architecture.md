@@ -32,7 +32,7 @@ Clerk and Greptile also appear in `adrianhajdin/llm-arena`; they were chosen her
 
 ### Versions confirmed so far
 
-pnpm 12.11.2, Turborepo 2.11.7, TypeScript 6.0.3, ESLint 9.39.5, Prettier 3.9.10, Vitest 5.0.3, Convex 1.46.0, `convex-test` 0.0.61. These dependency versions are exact, with their reasons in `docs/decision-log.md` (D-032 to D-036). Node is a range, not an exact pin: `engines` allows `>=24.3.0 <25` and `.nvmrc` is 24. Clerk is wired on the server only. Next.js, Expo SDK, React, `@clerk/nextjs`, and `@clerk/expo` are not chosen yet (D-038).
+pnpm 12.11.2, Turborepo 2.11.7, TypeScript 6.0.3, ESLint 9.39.5, Prettier 3.9.10, Vitest 5.0.3, Convex 1.46.0, `convex-test` 0.0.61. These dependency versions are exact, with their reasons in `docs/decision-log.md` (D-032 to D-036). Node is a range, not an exact pin: `engines` allows `>=24.3.0 <25` and `.nvmrc` is 24. Clerk is wired on the server (`packages/backend` token validation) and in the browser (`apps/web`). Next.js, React, and `@clerk/nextjs` are chosen and used by `apps/web`. Expo SDK and `@clerk/expo` are not chosen yet (D-038).
 
 ### What the shared packages are
 
@@ -96,8 +96,8 @@ Family metadata (people, edges, claims, stories) is small: a few MB per family, 
 
 ## Open items
 
-- Client apps: `apps/web` and `apps/mobile` do not exist (Feature 1 steps 3 and 4). Next.js, Expo SDK, and React are not pinned, and the Expo SDK choice, the mobile sign-in flow, and where the simulator and emulator proof runs are still undecided (D-038).
-- Sign-in is in progress. Nothing has been signed in against a real Clerk instance or Convex deployment, so no end-to-end proof path exists yet. The Clerk development app and the Convex development project both exist, and the Clerk issuer domain is already set in the Convex development deployment (owner-confirmed 2026-10-12, D-038). The sign-in proof itself is still to come.
+- Client apps: `apps/web` exists (Feature 1 step 3, D-040); `apps/mobile` does not (step 4). The Expo SDK choice, the mobile sign-in flow, and where the simulator and emulator proof runs are still undecided (D-038).
+- Sign-in is in progress. Nothing has been signed in against a real Clerk instance or Convex deployment, so no end-to-end proof path exists yet. The Clerk development app and the Convex development project both exist, and the Clerk issuer domain is already set in the Convex development deployment (owner-confirmed 2026-10-12, D-038). The web sign-in proof is written but its Playwright run waits for the owner's keys (`docs/scope.md`); the mobile proof is still to come.
 - Test stack beyond the shared packages and Convex: Playwright with `@clerk/testing` for web, `jest-expo` for mobile components, Maestro for mobile end to end (D-036). No coverage threshold.
 - CI hardening: `protect-main` has no required status checks, repository-wide action SHA pinning is off, and there is no mobile E2E workflow or Turbo remote cache (D-037). These change shared settings and need owner approval.
 - Convex codegen drift check: `convex codegen` needs `CONVEX_DEPLOYMENT`, so a drift job is still to be designed.
