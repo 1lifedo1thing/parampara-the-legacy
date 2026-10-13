@@ -20,7 +20,7 @@ During implementation, maintain a short checklist below the feature. After imple
 - Clients: web, Android, and iOS in the initial release.
 - MVP feature groups: family tree; invitations and relationship verification; deceased profiles and evidence; memories, stories, and photos; privacy and administration; opt-in city discovery; audio memories; spreadsheet import.
 - The product must remain useful without AI services.
-- Stack (D-014, D-015): Turborepo + pnpm; Next.js web; Expo for iOS and Android; Convex backend and database; Clerk auth; Cloudflare R2 media. Versions for the workspace tooling and `packages/backend` are pinned and recorded in `docs/decision-log.md` (D-032 to D-039). The web and mobile versions arrive with steps 3 and 4.
+- Stack (D-014, D-015): Turborepo + pnpm; Next.js web; Expo for iOS and Android; Convex backend and database; Clerk auth; Cloudflare R2 media. Versions for the workspace tooling and `packages/backend` are pinned and recorded in `docs/decision-log.md` (D-032 to D-040). The web and mobile versions arrive with steps 3 and 4.
 - Repository: public GitHub `Rajendra-Kr12/parampara-the-legacy`, `main` protected, PR-only (D-018).
 - Original idea notes: `docs/original-brief.md` (historical; this scope and the PRD supersede it where they differ).
 
@@ -102,7 +102,7 @@ Scaffold the Turborepo with web, mobile, Convex, and shared packages, proving on
 - [ ] Step 3 `feat/web-auth-proof` and step 4 `feat/mobile-auth-proof`: scaffold `apps/web` and `apps/mobile`, wire Clerk to Convex on both clients, and verify sign-in on web, iOS simulator, and Android emulator. Neither app exists.
 - [x] Set up formatter, linter, strict typecheck, and test runners; start the enforcement ledger (`docs/coding-standards.md`).
 - [ ] Step 5 `chore/ci-required-checks`: make the CI job names required on `protect-main` and turn on repository-wide action SHA pinning (owner approval needed; D-037).
-- [ ] Step 6 `chore/fallow-report`: Fallow as a pinned devDependency with a non-blocking CI job (D-039).
+- [ ] Step 6 `chore/para-fallow` (PR #11): Fallow as a pinned devDependency with a non-blocking CI job (D-039, implemented as D-040).
 - [x] Step 7 `docs/scope-feature-1`: documentation updated to match what steps 1 and 2 shipped (2026-10-12).
 - [ ] Resolve data-residency open item before any real data.
 
@@ -112,6 +112,8 @@ Step 1 tooling is covered by the enforcement probes in `packages/config/probes/`
 Step 2 (2026-10-12):
 - Automated, run locally: `pnpm run format`, `lint`, `typecheck`, `test` and `build` at the root all passed. `@parampara/backend` has 19 tests: `users.me` returns the name when signed in and null when signed out; another user, an identity with the same subject from a different issuer, and a forged argument naming another user never reach someone else's record; `auth.config.ts` refuses a missing or non-https `CLERK_JWT_ISSUER_DOMAIN`; and validation errors never contain the rejected value. Both denial tests were checked to fail when the guard is removed (an accepted argument, a missing signed-out check).
 - Manual: none. Not run: the CI workflow (runs on the PR), a real Clerk sign-in against the Convex dev deployment (needs a client app, steps 3 and 4).
+
+Step 6 (2026-10-12): Prettier check passed locally on `package.json`, `.fallowrc.json`, and `ci.yml`. No TypeScript changed, so ESLint did not apply. The `fallow` job has not run yet; its output is unverified until the PR's CI run.
 
 Step 7, documentation only (2026-10-12):
 - Automated, run locally in the worktree with the Turborepo cache bypassed, so nothing was replayed from a cached result: `lint`, `typecheck`, `test`, and `build` all passed. `@parampara/backend` 19 tests, `@parampara/config` 15 enforcement probes, and one test in each of `domain`, `kinship-engine`, and `validation`. `format` failed on one file, `.opencode/plugins/fm-busy-state.js`, which is untracked and is not part of this repository; every tracked source file passes `prettier --check`. That file is a local agent-harness artifact, so the failure is environmental. It was not added to `.prettierignore`, which would be a settings change outside this task.

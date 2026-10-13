@@ -2,7 +2,7 @@
 
 ## Status
 
-Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `packages/backend` exist; no web or mobile app yet. The toolchain versions are pinned and confirmed in `docs/decision-log.md` (D-032 to D-039); the web and mobile versions arrive with steps 3 and 4. The open items at the end are confirmed as those steps ship.
+Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `packages/backend` exist; no web or mobile app yet. The toolchain versions are pinned and confirmed in `docs/decision-log.md` (D-032 to D-040); the web and mobile versions arrive with steps 3 and 4. The open items at the end are confirmed as those steps ship.
 
 ## Architecture principles
 
@@ -26,7 +26,7 @@ Stack direction accepted 2026-10-10 (D-014, D-015). Workspace tooling, CI, and `
 | Auth | Clerk | Free tier covers 50,000 monthly retained users (Feb 2026); SDKs for Next.js and Expo; official Convex integration |
 | Media | Cloudflare R2 behind a storage adapter | ~$0.015/GB-month, no egress fees, S3-compatible so B2 or S3 can replace it by configuration |
 | PR review | Greptile + Codex adversarial review | Greptile on every PR; Codex before shipment |
-| CI | GitHub Actions | Format, lint, typecheck, test, build on every PR |
+| CI | GitHub Actions | Format, lint, typecheck, test, build on every PR; plus a non-blocking Fallow code-health report (D-040) |
 
 Clerk and Greptile also appear in `adrianhajdin/llm-arena`; they were chosen here on their own merits (D-021). llm-arena's Prisma, PostHog, and Arcjet choices were not adopted.
 
@@ -101,7 +101,6 @@ Family metadata (people, edges, claims, stories) is small: a few MB per family, 
 - Test stack beyond the shared packages and Convex: Playwright with `@clerk/testing` for web, `jest-expo` for mobile components, Maestro for mobile end to end (D-036). No coverage threshold.
 - CI hardening: `protect-main` has no required status checks, repository-wide action SHA pinning is off, and there is no mobile E2E workflow or Turbo remote cache (D-037). These change shared settings and need owner approval.
 - Convex codegen drift check: `convex codegen` needs `CONVEX_DEPLOYMENT`, so a drift job is still to be designed.
-- Fallow report job (D-039): accepted, not built.
 - i18n approach shared by Next.js and Expo, which D-025 requires Feature 1 to pick; CI should fail on a missing translation key.
 - Styling approach shared across web and mobile (for example NativeWind or Tamagui).
 - Data residency: confirm Convex and R2 regions and obligations under India's DPDP Act before storing real data.
