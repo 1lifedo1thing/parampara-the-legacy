@@ -9,6 +9,7 @@ docs
 tools
 .agents
 .claude
+.opencode
 .greptile
 README.md
 AGENTS.md
@@ -18,3 +19,7 @@ packages/config/probes/fixtures
 packages/backend/convex/_generated
 packages/backend/.convex
 .github/pull_request_template.md
+apps/mobile/ios
+apps/mobile/android
+apps/mobile/expo-env.d.ts
+.maestro
